@@ -26,9 +26,14 @@ def process(interval, utilization_list, ncpus):
     for utilization in utilization_list:
         utilization_str = str(utilization)
         print "\nSwitching to " + utilization_str + "%"
-        p = subprocess.Popen(['lookbusy',
-                              '--ncpus', ncpus_str,
-                              '--cpu-util', utilization_str])
+        if ncpus != 0:
+            p = subprocess.Popen(['lookbusy',
+                                  '--ncpus', ncpus_str,
+                                  '--cpu-util', utilization_str])
+        else:
+            p = subprocess.Popen(['lookbusy',
+                                  '--cpu-util', utilization_str])
+
         time.sleep(interval)
         p.terminate()
 
@@ -80,8 +85,8 @@ def main():
                help='source file containing a new line ' +
                'separated list of CPU utilization levels ' +
                'specified as numbers in the [0, 100] range'))
-    parser.add_option('-n', '--ncpus', type='int', dest='ncpus', default=1,
-                      help='number of CPU cores to utilize [default: 1]')
+    parser.add_option('-n', '--ncpus', type='int', dest='ncpus', default=0,
+                      help='number of CPU cores to utilize [default: autodetect]')
 
     (options, args) = parser.parse_args()
 
