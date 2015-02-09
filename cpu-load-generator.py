@@ -19,9 +19,28 @@ from optparse import OptionParser, Option, IndentedHelpFormatter
 import os
 import subprocess
 import time
+import psutil
 
+def occupy_available_ram():
+    """ 
+    Occupy 95% of free RAM.
+    When a VM is launched, the host doesn't give all the allocated memory at once.
+    By launching this function, 95% of free RAM is given to the VM, and never asked back
+    by the host (if no memory baloon).
+    """
+    free_mem = psutil.virtual_memory().free
+    free_mem*= 0.95
+    free_mem_str = str(int(free_mem))
+
+    p = subprocess.Popen(['lookbusy',
+                           '--mem-util', free_mem_str])
+
+    time.sleep(5) #just to ensure that lookbusy is executed
+    p.terminate() #the host has given the vm the demanded RAM, so we can shutdown lookbusy
 
 def process(interval, utilization_list, ncpus):
+    occupy_available_ram()
+
     ncpus_str = str(ncpus)
     for utilization in utilization_list:
         utilization_str = str(utilization)
