@@ -32,7 +32,7 @@ def occupy_available_ram():
     free_mem*= 0.95
     free_mem_str = str(int(free_mem))
 
-    p = subprocess.Popen(['lookbusy',
+    p = subprocess.Popen(['/usr/local/bin/lookbusy',
                            '--mem-util', free_mem_str])
 
     time.sleep(5) #just to ensure that lookbusy is executed
@@ -46,11 +46,11 @@ def process(interval, utilization_list, ncpus):
         utilization_str = str(utilization)
         print "\nSwitching to " + utilization_str + "%"
         if ncpus != 0:
-            p = subprocess.Popen(['lookbusy',
+            p = subprocess.Popen(['/usr/local/bin/lookbusy',
                                   '--ncpus', ncpus_str,
                                   '--cpu-util', utilization_str])
         else:
-            p = subprocess.Popen(['lookbusy',
+            p = subprocess.Popen(['/usr/local/bin/lookbusy',
                                   '--cpu-util', utilization_str])
 
         time.sleep(interval)
