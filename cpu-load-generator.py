@@ -27,6 +27,10 @@ def process(interval, utilization_list, ncpus, fixed_mem_util):
     occupy_mem_str = str(occupy_mem)
     ncpus_str = str(ncpus)
 
+    print ncpus_str
+    print occupy_mem_str
+	
+
     for utilization in utilization_list:
         utilization_str = str(utilization)
         print "\nSwitching to " + utilization_str + "%"
@@ -36,11 +40,9 @@ def process(interval, utilization_list, ncpus, fixed_mem_util):
                                   '--cpu-util', utilization_str,
                                   '--mem-util', occupy_mem_str])
         else:
-            p = subprocess.Popen(['lookbusy',
+            p = subprocess.Popen(['/usr/local/bin/lookbusy',
                                   '--cpu-util', utilization_str,
                                   '--mem-util', occupy_mem_str])
-            p = subprocess.Popen(['/usr/local/bin/lookbusy',
-                                  '--cpu-util', utilization_str])
 
         time.sleep(interval)
         p.terminate()
@@ -130,8 +132,6 @@ def main():
 
     if interval <= 0:
         parser.error('interval must be an integer >= 0')
-
-    mem_percentage = 85
 
     process(interval, utilization, options.ncpus, options.fixed_mem_util)
 
