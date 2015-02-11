@@ -21,25 +21,12 @@ import subprocess
 import time
 import psutil
 
-def occupy_available_ram():
-    """ 
-    Occupy 95% of free RAM.
-    When a VM is launched, the host doesn't give all the allocated memory at once.
-    By launching this function, 95% of free RAM is given to the VM, and never asked back
-    by the host (if no memory baloon).
-    """
-    free_mem = psutil.virtual_memory().free
-    free_mem*= 0.95
-    free_mem_str = str(int(free_mem))
-
-    p = subprocess.Popen(['lookbusy',
-                           '--mem-util', free_mem_str])
-
-    time.sleep(5) #just to ensure that lookbusy is executed
-    p.terminate() #the host has given the vm the demanded RAM, so we can shutdown lookbusy
-
-def process(interval, utilization_list, ncpus):
-    occupy_available_ram()
+def process(interval, utilization_list, ncpus, fixed_mem_util):
+    free_mem = psutil.virtual_memory().free #bytes
+    occupy_mem = free_mem*fixed_mem_util/100
+    occupy_mem_str = str(occupy_mem)
+    print occupy_mem_str
+    print free_mem
 
     ncpus_str = str(ncpus)
     for utilization in utilization_list:
@@ -48,10 +35,12 @@ def process(interval, utilization_list, ncpus):
         if ncpus != 0:
             p = subprocess.Popen(['lookbusy',
                                   '--ncpus', ncpus_str,
-                                  '--cpu-util', utilization_str])
+                                  '--cpu-util', utilization_str,
+                                  '--mem-util', occupy_mem_str])
         else:
             p = subprocess.Popen(['lookbusy',
-                                  '--cpu-util', utilization_str])
+                                  '--cpu-util', utilization_str,
+                                  '--mem-util', occupy_mem_str])
 
         time.sleep(interval)
         p.terminate()
@@ -107,6 +96,9 @@ def main():
     parser.add_option('-n', '--ncpus', type='int', dest='ncpus', default=0,
                       help='number of CPU cores to utilize [default: autodetect]')
 
+    parser.add_option('-m', '--mem-util', type='int', dest='fixed_mem_util', default=0,
+                      help='percentage of free ram to occupy [default: 0]')
+
     (options, args) = parser.parse_args()
 
     if len(args) != 2:
@@ -139,7 +131,9 @@ def main():
     if interval <= 0:
         parser.error('interval must be an integer >= 0')
 
-    process(interval, utilization, options.ncpus)
+    mem_percentage = 85
+
+    process(interval, utilization, options.ncpus, options.fixed_mem_util)
 
 
 if __name__ == '__main__':
