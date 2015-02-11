@@ -25,15 +25,13 @@ def process(interval, utilization_list, ncpus, fixed_mem_util):
     free_mem = psutil.virtual_memory().free #bytes
     occupy_mem = free_mem*fixed_mem_util/100
     occupy_mem_str = str(occupy_mem)
-    print occupy_mem_str
-    print free_mem
-
     ncpus_str = str(ncpus)
+
     for utilization in utilization_list:
         utilization_str = str(utilization)
         print "\nSwitching to " + utilization_str + "%"
         if ncpus != 0:
-            p = subprocess.Popen(['lookbusy',
+            p = subprocess.Popen(['/usr/local/bin/lookbusy',
                                   '--ncpus', ncpus_str,
                                   '--cpu-util', utilization_str,
                                   '--mem-util', occupy_mem_str])
@@ -41,6 +39,8 @@ def process(interval, utilization_list, ncpus, fixed_mem_util):
             p = subprocess.Popen(['lookbusy',
                                   '--cpu-util', utilization_str,
                                   '--mem-util', occupy_mem_str])
+            p = subprocess.Popen(['/usr/local/bin/lookbusy',
+                                  '--cpu-util', utilization_str])
 
         time.sleep(interval)
         p.terminate()
